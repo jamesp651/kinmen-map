@@ -1,10 +1,9 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-
-<title>2026 金門迎城隍 即時勤務系統</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+<title>2026 金門迎城隍 即時定位與直播系統</title>
 
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -13,15 +12,14 @@
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 
 <style>
-
-html,body{
+html, body{
     margin:0;
     padding:0;
     width:100%;
     height:100%;
     overflow:hidden;
     font-family:"Microsoft JhengHei",sans-serif;
-    background:#000;
+    background:#f5f5f5;
 }
 
 #map{
@@ -35,31 +33,105 @@ html,body{
     top:10px;
     left:10px;
     z-index:9999;
-    width:330px;
-    max-height:95vh;
-    overflow-y:auto;
-
+    width:320px;
+    max-height:92vh;
+    overflow:hidden;
     background:rgba(255,255,255,0.97);
     border-radius:14px;
+    box-shadow:0 4px 20px rgba(0,0,0,0.25);
+    display:flex;
+    flex-direction:column;
+    transition:0.3s;
+}
 
-    box-shadow:0 4px 20px rgba(0,0,0,0.3);
+.control-panel.minimized{
+    width:150px;
+    height:42px;
 }
 
 .panel-header{
-    background:#b71c1c;
+    background:#c62828;
     color:#fff;
-    padding:12px;
-    font-size:16px;
+    padding:10px;
+    font-size:15px;
     font-weight:bold;
-    text-align:center;
-    border-radius:14px 14px 0 0;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    cursor:pointer;
 }
 
-.panel-body{
+.panel-content{
+    overflow-y:auto;
     padding:10px;
 }
 
-.live-box{
+.control-panel.minimized .panel-content{
+    display:none;
+}
+
+.live-clock{
+    background:#8e0000;
+    color:#fff;
+    text-align:center;
+    padding:5px;
+    font-family:monospace;
+    font-size:14px;
+    letter-spacing:1px;
+}
+
+button{
+    width:100%;
+    border:none;
+    border-radius:8px;
+    padding:9px;
+    margin-bottom:6px;
+    font-weight:bold;
+    cursor:pointer;
+    font-size:13px;
+}
+
+.btn-toggle{
+    width:auto;
+    background:none;
+    color:#fff;
+    border:1px solid #fff;
+    padding:2px 6px;
+    margin:0;
+}
+
+.btn-admin{
+    background:#ff9800;
+    color:white;
+}
+
+.btn-tail{
+    background:#4caf50;
+    color:white;
+}
+
+.btn-clear{
+    background:#607d8b;
+    color:#fff;
+}
+
+.status-info{
+    text-align:center;
+    font-size:12px;
+    color:#555;
+    margin-top:4px;
+    font-weight:bold;
+}
+
+.dist-info{
+    text-align:center;
+    font-size:15px;
+    color:#d32f2f;
+    font-weight:bold;
+    margin:6px 0;
+}
+
+.youtube-box{
     width:100%;
     aspect-ratio:16/9;
     border-radius:10px;
@@ -68,111 +140,71 @@ html,body{
     margin-bottom:10px;
 }
 
-.live-box iframe{
+.youtube-box iframe{
     width:100%;
     height:100%;
     border:none;
 }
 
-.live-clock{
-    background:#212121;
-    color:#fff;
-    text-align:center;
-    padding:6px;
-    border-radius:8px;
-    margin-bottom:8px;
-    font-family:monospace;
-    font-size:15px;
-}
-
-.status{
-    background:#f5f5f5;
-    padding:8px;
-    border-radius:8px;
-    margin-bottom:8px;
-    font-size:13px;
-    text-align:center;
-}
-
-.distance{
-    background:#fff3e0;
-    color:#d84315;
-    font-size:18px;
-    text-align:center;
-    padding:10px;
-    border-radius:8px;
-    margin-bottom:10px;
-    font-weight:bold;
-}
-
-button{
-    width:100%;
-    border:none;
-    border-radius:8px;
-    padding:10px;
-    margin-bottom:8px;
-    font-weight:bold;
-    cursor:pointer;
-    color:white;
-    font-size:14px;
-}
-
-.btn-admin{
-    background:#d32f2f;
-}
-
-.btn-tail{
-    background:#388e3c;
-}
-
-.btn-clear{
-    background:#546e7a;
-}
-
-.section{
-    margin-top:10px;
+.report-section{
     border-top:2px solid #eee;
+    margin-top:10px;
     padding-top:10px;
 }
 
-.section-title{
-    font-size:15px;
-    font-weight:bold;
-    margin-bottom:10px;
+.report-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:8px;
 }
 
-.grid{
+.report-title{
+    font-size:14px;
+    font-weight:bold;
+}
+
+.btn-reset{
+    width:auto;
+    padding:3px 8px;
+    background:#eee;
+    color:#666;
+    font-size:11px;
+    margin:0;
+}
+
+.btn-grid{
     display:grid;
-    grid-template-columns:1fr 1fr;
+    grid-template-columns:repeat(2,1fr);
     gap:8px;
 }
 
-.item{
-    background:#fafafa;
-    border-radius:8px;
-    padding:5px;
-    text-align:center;
+.report-item{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+}
+
+.btn-report{
+    background:#fff;
     border:1px solid #ddd;
-}
-
-.item button{
     margin:0;
-    font-size:12px;
 }
 
-.arrive{
-    background:#43a047;
+.btn-arrived{
+    border-left:5px solid #4caf50;
 }
 
-.leave{
-    background:#e53935;
+.btn-left{
+    border-left:5px solid #f44336;
 }
 
-.time{
-    margin-top:5px;
-    font-size:18px;
+.time-label{
+    margin-top:4px;
+    font-size:16px;
+    font-weight:900;
     color:#d32f2f;
-    font-weight:bold;
+    height:20px;
 }
 
 .marker-icon{
@@ -182,105 +214,107 @@ button{
     width:42px;
     height:42px;
     border-radius:50%;
-    background:white;
-    border:3px solid #d32f2f;
+    background:#fff;
     font-size:24px;
-    box-shadow:0 0 10px rgba(0,0,0,0.4);
+    box-shadow:0 0 12px rgba(0,0,0,0.3);
 }
 
 .god-marker{
+    border:3px solid #d32f2f;
     animation:pulse 2s infinite;
 }
 
 .tail-marker{
-    border-color:#43a047;
+    border:3px solid #4caf50;
 }
 
 @keyframes pulse{
-    0%{box-shadow:0 0 0 0 rgba(211,47,47,.7);}
-    70%{box-shadow:0 0 0 12px rgba(211,47,47,0);}
-    100%{box-shadow:0 0 0 0 rgba(211,47,47,0);}
+    0%{
+        box-shadow:0 0 0 0 rgba(211,47,47,0.7);
+    }
+    70%{
+        box-shadow:0 0 0 12px rgba(211,47,47,0);
+    }
+    100%{
+        box-shadow:0 0 0 0 rgba(211,47,47,0);
+    }
 }
 
 @media(max-width:768px){
-
-.control-panel{
-    width:95%;
-    left:2.5%;
-    top:5px;
+    .control-panel{
+        width:94%;
+        left:3%;
+        top:8px;
+    }
 }
-
-}
-
 </style>
 </head>
 
 <body>
 
-<div class="control-panel">
+<div id="mainPanel" class="control-panel">
 
-    <div class="panel-header">
-        2026 金門迎城隍 即時勤務系統
+    <div class="panel-header" onclick="togglePanel()">
+        <span>👮‍♂️ 2026 金門迎城隍勤務</span>
+        <button class="btn-toggle" id="toggleBtn">收合</button>
     </div>
 
-    <div class="panel-body">
+    <div id="liveClock" class="live-clock">
+        ----/--/-- --:--:--
+    </div>
+
+    <div class="panel-content">
 
         <!-- YouTube LIVE -->
-        <div class="live-box">
-
+        <div class="youtube-box">
             <iframe
                 src="https://www.youtube.com/embed/0PLVzLXfoqk?autoplay=1&mute=1"
-                allow="autoplay; encrypted-media"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                 allowfullscreen>
             </iframe>
-
         </div>
 
-        <div class="live-clock" id="liveClock">
-            ----/--/-- --:--:--
-        </div>
-
-        <div class="status" id="statusText">
-            等待神轎定位資料...
-        </div>
-
-        <div class="distance" id="distanceText">
-            隊伍長度：-- 公尺
-        </div>
-
-        <button class="btn-admin" onclick="toggleAdminMode()">
-            📡 神轎頭定位回報
-        </button>
-
-        <button class="btn-tail" onclick="toggleTailMode()">
+        <button id="tailBtn" class="btn-tail" onclick="toggleTailMode()">
             🚩 隊伍尾端定位回報
         </button>
 
-        <button class="btn-clear" onclick="clearRoutePath()">
-            🧹 清除今日行經路線
+        <button id="adminBtn" class="btn-admin" onclick="toggleAdminMode()">
+            📡 神轎位置回報
         </button>
 
-        <!-- 長官蒞臨 -->
-        <div class="section">
+        <div id="statusText" class="status-info">
+            等待定位資料中...
+        </div>
 
-            <div class="section-title">
-                📌 長官蒞臨時間
+        <div id="distanceText" class="dist-info">
+            隊伍長度：-- 公尺
+        </div>
+
+        <!-- 長官蒞臨 -->
+        <div class="report-section">
+
+            <div class="report-header">
+                <span class="report-title">📌 長官蒞臨時間</span>
+                <button class="btn-reset" onclick="resetSection('蒞')">清空</button>
             </div>
 
-            <div class="grid" id="arrivalGrid"></div>
-
+            <div class="btn-grid" id="arrivalGrid"></div>
         </div>
 
         <!-- 長官離轄 -->
-        <div class="section">
+        <div class="report-section">
 
-            <div class="section-title">
-                🚶 長官離轄時間
+            <div class="report-header">
+                <span class="report-title">🚶 長官離轄時間</span>
+                <button class="btn-reset" onclick="resetSection('離')">清空</button>
             </div>
 
-            <div class="grid" id="departureGrid"></div>
-
+            <div class="btn-grid" id="departureGrid"></div>
         </div>
+
+        <button class="btn-clear" onclick="clearRoutePath()">
+            🧹 清除今日行走軌跡
+        </button>
 
     </div>
 </div>
@@ -289,128 +323,135 @@ button{
 
 <script>
 
-/* =========================================
-   Firebase
-========================================= */
+/* =========================================================
+   1. 路線資料
+========================================================= */
+
+const rawCoords = [
+[118.31598185256757,24.432490591580518],
+[118.31588557768761,24.432564156830114],
+[118.31578930280764,24.43263772207971],
+[118.31569302792768,24.432711287329308],
+[118.31559675304771,24.432784852578905],
+[118.31536996766096,24.43270930151033],
+[118.3151431822742,24.432633750441752]
+];
+
+const routePoints = rawCoords.map(p => [p[1], p[0]]);
+
+/* =========================================================
+   2. 地圖初始化
+========================================================= */
+
+const map = L.map('map',{
+    zoomControl:false
+}).setView([24.4335,118.3165],16);
+
+L.tileLayer(
+    'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+    {
+        attribution:'© OpenStreetMap'
+    }
+).addTo(map);
+
+/* 粉紅色預定路線 */
+const routeLine = L.polyline(routePoints,{
+    color:'#ff1493',
+    weight:6,
+    opacity:0.7
+}).addTo(map);
+
+/* 灰色虛線已走過 */
+const passedPath = L.polyline([],{
+    color:'#666',
+    weight:4,
+    dashArray:'6,10',
+    opacity:0.9
+}).addTo(map);
+
+/* =========================================================
+   3. Marker
+========================================================= */
+
+const godIcon = L.divIcon({
+    html:'<div class="marker-icon god-marker">👨‍⚖️</div>',
+    className:'',
+    iconSize:[42,42],
+    iconAnchor:[21,21]
+});
+
+const tailIcon = L.divIcon({
+    html:'<div class="marker-icon tail-marker">🚩</div>',
+    className:'',
+    iconSize:[40,40],
+    iconAnchor:[20,20]
+});
+
+const palanquinMarker = L.marker(routePoints[0],{
+    icon:godIcon
+}).addTo(map);
+
+const tailMarker = L.marker([0,0],{
+    icon:tailIcon,
+    opacity:0
+}).addTo(map);
+
+/* =========================================================
+   4. Firebase
+========================================================= */
 
 const firebaseConfig = {
-
-    apiKey: "AIzaSyAWtgeRkdjtaHdtnoKdgOMQ_PTBMpwmsLI",
-    databaseURL: "https://kinmen-location-default-rtdb.firebaseio.com",
-    projectId: "kinmen-location"
-
+    apiKey:"AIzaSyAWtgeRkdjtaHdtnoKdgOMQ_PTBMpwmsLI",
+    databaseURL:"https://kinmen-location-default-rtdb.firebaseio.com",
+    projectId:"kinmen-location"
 };
 
 firebase.initializeApp(firebaseConfig);
 
 const db = firebase.database();
 
-/* =========================================
-   地圖初始化
-========================================= */
+/* =========================================================
+   5. 面板
+========================================================= */
 
-const map = L.map('map',{zoomControl:false})
-.setView([24.4335,118.3165],16);
+function togglePanel(){
+    const panel = document.getElementById('mainPanel');
+    const btn = document.getElementById('toggleBtn');
 
-L.tileLayer(
-'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-{
-    attribution:'© OpenStreetMap'
+    panel.classList.toggle('minimized');
+
+    btn.innerText =
+        panel.classList.contains('minimized')
+        ? '展開'
+        : '收合';
 }
-).addTo(map);
 
-/* =========================================
-   路線資料
-========================================= */
-
-const routePoints = [
-
-[24.432490591580518,118.31598185256757],
-[24.432564156830114,118.31588557768761],
-[24.43263772207971,118.31578930280764],
-[24.432711287329308,118.31569302792768],
-[24.432784852578905,118.31559675304771],
-[24.43270930151033,118.31536996766096],
-[24.432633750441752,118.3151431822742],
-[24.432759653379634,118.31500769258054]
-
-];
-
-/* 主路線 */
-
-L.polyline(routePoints,{
-    color:"#d32f2f",
-    weight:6,
-    opacity:0.4
-}).addTo(map);
-
-/* 已行經灰色虛線 */
-
-const passedPath = L.polyline([],{
-    color:"#555",
-    weight:4,
-    dashArray:"8,8",
-    opacity:0.9
-}).addTo(map);
-
-/* =========================================
-   ICON
-========================================= */
-
-const godIcon = L.divIcon({
-
-    html:`<div class="marker-icon god-marker">👨‍⚖️</div>`,
-    className:'',
-    iconSize:[42,42],
-    iconAnchor:[21,21]
-
-});
-
-const tailIcon = L.divIcon({
-
-    html:`<div class="marker-icon tail-marker">🚩</div>`,
-    className:'',
-    iconSize:[42,42],
-    iconAnchor:[21,21]
-
-});
-
-/* Marker */
-
-const palanquinMarker = L.marker(routePoints[0],{
-    icon:godIcon
-}).addTo(map);
-
-const tailMarker = L.marker(routePoints[0],{
-    icon:tailIcon,
-    opacity:0
-}).addTo(map);
-
-/* =========================================
-   時鐘
-========================================= */
+/* =========================================================
+   6. 時鐘
+========================================================= */
 
 function updateClock(){
 
     const now = new Date();
 
-    const t =
-        now.getFullYear() + "/" +
-        String(now.getMonth()+1).padStart(2,'0') + "/" +
-        String(now.getDate()).padStart(2,'0') + " " +
-        String(now.getHours()).padStart(2,'0') + ":" +
-        String(now.getMinutes()).padStart(2,'0') + ":" +
-        String(now.getSeconds()).padStart(2,'0');
+    const y = now.getFullYear();
+    const m = String(now.getMonth()+1).padStart(2,'0');
+    const d = String(now.getDate()).padStart(2,'0');
 
-    document.getElementById("liveClock").innerText = t;
+    const hh = String(now.getHours()).padStart(2,'0');
+    const mm = String(now.getMinutes()).padStart(2,'0');
+    const ss = String(now.getSeconds()).padStart(2,'0');
+
+    document.getElementById('liveClock').innerText =
+        `${y}/${m}/${d} ${hh}:${mm}:${ss}`;
 }
 
 setInterval(updateClock,1000);
 updateClock();
 
-/* =========================================
-   定位同步
-========================================= */
+/* =========================================================
+   7. 定位同步
+========================================================= */
 
 let godPos = null;
 let tailPos = null;
@@ -423,13 +464,10 @@ function calculateDistance(){
             L.latLng(godPos)
             .distanceTo(L.latLng(tailPos));
 
-        document.getElementById("distanceText")
-        .innerText =
-        `隊伍長度：${Math.round(d)} 公尺`;
+        document.getElementById('distanceText')
+        .innerText = `隊伍長度：${Math.round(d)} 公尺`;
     }
 }
-
-/* 神轎同步 */
 
 function syncPalanquin(lat,lng){
 
@@ -442,29 +480,27 @@ function syncPalanquin(lat,lng){
 
     routePoints.forEach((p,i)=>{
 
-        let d =
-            L.latLng(p)
-            .distanceTo(currentPos);
+        const d =
+            L.latLng(p).distanceTo(currentPos);
 
         if(d < minDist){
-
             minDist = d;
             closestIdx = i;
-
         }
-
     });
-
-    palanquinMarker.setLatLng(routePoints[closestIdx]);
 
     passedPath.setLatLngs(
         routePoints.slice(0,closestIdx+1)
     );
 
+    palanquinMarker.setLatLng(
+        routePoints[closestIdx]
+    );
+
     calculateDistance();
 }
 
-/* Firebase 監聽 */
+/* 神轎位置 */
 
 db.ref('palanquin/location')
 .on('value',(snapshot)=>{
@@ -475,17 +511,15 @@ db.ref('palanquin/location')
 
         syncPalanquin(d.lat,d.lng);
 
-        document.getElementById("statusText")
+        document.getElementById('statusText')
         .innerText =
-        "最後更新：" +
-        new Date(d.timestamp)
-        .toLocaleTimeString();
-
+            '最後更新：' +
+            new Date(d.timestamp)
+            .toLocaleTimeString();
     }
-
 });
 
-/* 隊伍尾端 */
+/* 隊尾位置 */
 
 db.ref('palanquin/tail')
 .on('value',(snapshot)=>{
@@ -497,131 +531,153 @@ db.ref('palanquin/tail')
         tailPos = [d.lat,d.lng];
 
         tailMarker
-        .setLatLng(tailPos)
-        .setOpacity(1);
+            .setLatLng(tailPos)
+            .setOpacity(1);
 
         calculateDistance();
-
     }
-
 });
 
-/* =========================================
-   神轎頭 GPS 回報
-========================================= */
+/* =========================================================
+   8. 清除軌跡
+========================================================= */
 
-let adminWatch = null;
-let tailWatch = null;
+db.ref('system/pathReset')
+.on('value',()=>{
 
-function toggleAdminMode(){
-
-    if(adminWatch){
-
-        navigator.geolocation.clearWatch(adminWatch);
-
-        adminWatch = null;
-
-        alert("已停止神轎頭定位");
-
-        return;
-    }
-
-    adminWatch =
-    navigator.geolocation.watchPosition(
-
-        (pos)=>{
-
-            db.ref('palanquin/location')
-            .set({
-
-                lat:pos.coords.latitude,
-                lng:pos.coords.longitude,
-                timestamp:Date.now()
-
-            });
-
-        },
-
-        (err)=>{
-            alert("GPS失敗："+err.message);
-        },
-
-        {
-            enableHighAccuracy:true,
-            maximumAge:1000
-        }
-
-    );
-
-    alert("神轎頭定位啟動");
-
-}
-
-/* =========================================
-   隊伍尾端 GPS
-========================================= */
-
-function toggleTailMode(){
-
-    if(tailWatch){
-
-        navigator.geolocation.clearWatch(tailWatch);
-
-        tailWatch = null;
-
-        alert("已停止尾端定位");
-
-        return;
-    }
-
-    tailWatch =
-    navigator.geolocation.watchPosition(
-
-        (pos)=>{
-
-            db.ref('palanquin/tail')
-            .set({
-
-                lat:pos.coords.latitude,
-                lng:pos.coords.longitude,
-                timestamp:Date.now()
-
-            });
-
-        },
-
-        (err)=>{
-            alert("GPS失敗："+err.message);
-        },
-
-        {
-            enableHighAccuracy:true,
-            maximumAge:1000
-        }
-
-    );
-
-    alert("尾端定位啟動");
-
-}
-
-/* =========================================
-   清除路徑
-========================================= */
+    passedPath.setLatLngs([]);
+});
 
 function clearRoutePath(){
 
-    if(confirm("確定清除灰色已行經路線？")){
+    if(confirm('確定清除今日行走軌跡？')){
 
-        passedPath.setLatLngs([]);
-
+        db.ref('system/pathReset')
+        .set(Date.now());
     }
-
 }
 
-/* =========================================
-   長官報到系統
-========================================= */
+/* =========================================================
+   9. 神轎定位模式
+========================================================= */
+
+let isAdmin = false;
+let watchId = null;
+
+function toggleAdminMode(){
+
+    if(!isAdmin){
+
+        if(confirm('啟動神轎定位發送？')){
+
+            isAdmin = true;
+
+            const btn =
+                document.getElementById('adminBtn');
+
+            btn.innerText = '🛑 停止發送(頭)';
+            btn.style.background = '#f44336';
+
+            watchId =
+                navigator.geolocation.watchPosition(
+
+                    (p)=>{
+
+                        db.ref('palanquin/location')
+                        .set({
+                            lat:p.coords.latitude,
+                            lng:p.coords.longitude,
+                            timestamp:Date.now()
+                        });
+                    },
+
+                    (err)=>{
+                        alert(err.message);
+                    },
+
+                    {
+                        enableHighAccuracy:true
+                    }
+                );
+        }
+
+    }else{
+
+        isAdmin = false;
+
+        const btn =
+            document.getElementById('adminBtn');
+
+        btn.innerText = '📡 神轎位置回報';
+        btn.style.background = '#ff9800';
+
+        navigator.geolocation.clearWatch(watchId);
+    }
+}
+
+/* =========================================================
+   10. 隊尾模式
+========================================================= */
+
+let isTail = false;
+let tailWatchId = null;
+
+function toggleTailMode(){
+
+    if(!isTail){
+
+        if(confirm('啟動隊伍尾端定位回報？')){
+
+            isTail = true;
+
+            const btn =
+                document.getElementById('tailBtn');
+
+            btn.innerText = '🛑 停止回報(尾)';
+            btn.style.background = '#f44336';
+
+            tailWatchId =
+                navigator.geolocation.watchPosition(
+
+                    (p)=>{
+
+                        db.ref('palanquin/tail')
+                        .set({
+                            lat:p.coords.latitude,
+                            lng:p.coords.longitude,
+                            timestamp:Date.now()
+                        });
+                    },
+
+                    (err)=>{
+                        alert(err.message);
+                    },
+
+                    {
+                        enableHighAccuracy:true
+                    }
+                );
+        }
+
+    }else{
+
+        isTail = false;
+
+        const btn =
+            document.getElementById('tailBtn');
+
+        btn.innerText = '🚩 隊伍尾端定位回報';
+        btn.style.background = '#4caf50';
+
+        navigator.geolocation.clearWatch(
+            tailWatchId
+        );
+    }
+}
+
+/* =========================================================
+   11. 長官回報
+========================================================= */
 
 const officials = [
     '縣長',
@@ -631,98 +687,103 @@ const officials = [
     '副議長'
 ];
 
-function initOfficials(){
+function initGrids(){
 
     const arrivalGrid =
-    document.getElementById("arrivalGrid");
+        document.getElementById('arrivalGrid');
 
     const departureGrid =
-    document.getElementById("departureGrid");
+        document.getElementById('departureGrid');
 
-    officials.forEach(name=>{
+    officials.forEach(p=>{
 
         arrivalGrid.innerHTML += `
-        <div class="item">
-            <button class="arrive"
-            onclick="reportStatus('${name}','蒞')">
-            ${name}
+        <div class="report-item">
+            <button class="btn-report btn-arrived"
+                onclick="reportStatus('${p}','蒞轄')">
+                ${p.replace('副縣長','副縣')}
             </button>
-            <div class="time"
-            id="time-${name}-蒞">--:--</div>
-        </div>
-        `;
+            <span id="time-${p}-蒞"
+                class="time-label">--:--</span>
+        </div>`;
 
         departureGrid.innerHTML += `
-        <div class="item">
-            <button class="leave"
-            onclick="reportStatus('${name}','離')">
-            ${name}
+        <div class="report-item">
+            <button class="btn-report btn-left"
+                onclick="reportStatus('${p}','離轄')">
+                ${p.replace('副縣長','副縣')}
             </button>
-            <div class="time"
-            id="time-${name}-離">--:--</div>
-        </div>
-        `;
-
+            <span id="time-${p}-離"
+                class="time-label">--:--</span>
+        </div>`;
     });
-
 }
 
-initOfficials();
+initGrids();
 
-/* 回報 */
+function reportStatus(person,action){
 
-function reportStatus(person,type){
+    const key =
+        action === '蒞轄'
+        ? '蒞'
+        : '離';
 
-    db.ref(`officials/${person}/${type}`)
+    db.ref(`officials/${person}/${key}`)
     .set({
-
         timestamp:Date.now()
-
     });
-
 }
 
-/* 監聽 */
+function resetSection(key){
+
+    if(!confirm('確定清空時間？')) return;
+
+    db.ref('officials')
+    .once('value',(snapshot)=>{
+
+        const data = snapshot.val();
+
+        if(!data) return;
+
+        Object.keys(data).forEach(person=>{
+
+            db.ref(`officials/${person}/${key}`)
+            .remove();
+        });
+    });
+}
 
 db.ref('officials')
 .on('value',(snapshot)=>{
 
     const data = snapshot.val() || {};
 
-    officials.forEach(name=>{
+    officials.forEach(person=>{
 
-        ['蒞','離'].forEach(type=>{
+        ['蒞','離'].forEach(k=>{
 
             const el =
-            document.getElementById(
-                `time-${name}-${type}`
-            );
-
-            if(
-                data[name] &&
-                data[name][type]
-            ){
-
-                const t =
-                new Date(
-                    data[name][type].timestamp
+                document.getElementById(
+                    `time-${person}-${k}`
                 );
 
+            if(data[person] && data[person][k]){
+
+                const t =
+                    new Date(
+                        data[person][k].timestamp
+                    );
+
                 el.innerText =
-                    String(t.getHours()).padStart(2,'0')
-                    + ":" +
-                    String(t.getMinutes()).padStart(2,'0');
+                    `${String(t.getHours()).padStart(2,'0')}:`+
+                    `${String(t.getMinutes()).padStart(2,'0')}`;
 
             }else{
 
-                el.innerText = "--:--";
-
+                el.innerText = '--:--';
             }
-
         });
-
     });
-
 });
 
 </script>
