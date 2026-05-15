@@ -1,63 +1,111 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
-<title>2026 金門迎城隍 - 即時定位暨警力跳崗系統</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+<title>2026 金門迎城隍勤務系統</title>
 
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 
 <style>
-html, body{
+
+html,body{
     margin:0;
     padding:0;
     width:100%;
     height:100%;
     overflow:hidden;
-    font-family:"Microsoft JhengHei", sans-serif;
+    font-family:"Microsoft JhengHei",sans-serif;
 }
 
 #map{
     width:100%;
     height:100vh;
-    z-index:1;
 }
 
-/* ================= 控制面板 ================= */
+/* =====================================================
+   主控制面板
+===================================================== */
+
 .control-panel{
     position:absolute;
     top:10px;
     left:10px;
     z-index:1000;
-    width:310px;
+
+    width:340px;
     max-height:92vh;
+
     overflow:hidden;
+
+    background:rgba(255,255,255,.97);
+
+    border-radius:14px;
+
+    box-shadow:0 5px 18px rgba(0,0,0,.25);
+
     display:flex;
     flex-direction:column;
 
-    background:rgba(255,255,255,0.97);
-    border-radius:14px;
-    box-shadow:0 5px 18px rgba(0,0,0,.25);
-    transition:all .3s ease;
+    transition:.3s;
 }
 
+/* 收合後大小 */
+
 .control-panel.minimized{
-    width:160px;
+    width:260px;
     height:42px;
 }
 
+/* 頂部 */
+
 .panel-header{
     background:#c62828;
-    color:#fff;
-    padding:10px;
+    color:white;
+
+    padding:8px 10px;
+
     display:flex;
     justify-content:space-between;
     align-items:center;
+
     cursor:pointer;
+
+    white-space:nowrap;
 }
+
+/* 標題 */
+
+.panel-header span{
+    font-size:16px;
+    font-weight:bold;
+
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+}
+
+/* 收合按鈕 */
+
+.btn-toggle{
+    width:auto;
+    margin:0;
+    padding:2px 8px;
+
+    background:none;
+    color:white;
+
+    border:1px solid white;
+    border-radius:5px;
+
+    font-size:12px;
+
+    flex-shrink:0;
+}
+
+/* 面板內容 */
 
 .panel-content{
     overflow-y:auto;
@@ -68,34 +116,36 @@ html, body{
     display:none;
 }
 
-.btn-toggle{
-    background:none;
-    color:white;
-    border:1px solid #fff;
-    border-radius:5px;
-    font-size:12px;
-    padding:2px 8px;
-}
+/* 時鐘 */
 
 .live-clock{
     background:#8e0000;
-    color:#fff;
+    color:white;
     text-align:center;
-    font-family:monospace;
+
     padding:5px 0;
-    font-size:14px;
+
+    font-family:monospace;
     letter-spacing:1px;
 }
+
+/* 按鈕 */
 
 button{
     width:100%;
     border:none;
     border-radius:8px;
+
     padding:9px;
+
     margin-bottom:6px;
+
     font-weight:bold;
+
     cursor:pointer;
 }
+
+/* 原功能按鈕 */
 
 .btn-admin{
     background:#ff9800;
@@ -107,23 +157,27 @@ button{
     color:white;
 }
 
+/* 資訊 */
+
 .status-info{
     text-align:center;
-    font-size:12px;
     margin-top:5px;
+    font-size:12px;
     color:#555;
     font-weight:bold;
 }
 
 .dist-info{
     text-align:center;
+    margin-top:6px;
     color:#c62828;
     font-size:14px;
-    margin-top:6px;
     font-weight:bold;
 }
 
-/* ================= 跳崗控制 ================= */
+/* =====================================================
+   跳崗部署
+===================================================== */
 
 .jump-section{
     margin-top:10px;
@@ -135,8 +189,9 @@ button{
     font-size:15px;
     font-weight:bold;
     margin-bottom:8px;
-    color:#333;
 }
+
+/* 階段按鈕 */
 
 .stage-grid{
     display:grid;
@@ -146,7 +201,6 @@ button{
 
 .stage-btn{
     color:white;
-    font-size:13px;
 }
 
 .stage1{ background:#1565c0; }
@@ -160,7 +214,9 @@ button{
     margin-top:8px;
 }
 
-/* ================= 指揮統計 ================= */
+/* =====================================================
+   指揮統計
+===================================================== */
 
 .command-panel{
     margin-top:10px;
@@ -173,222 +229,236 @@ button{
     border:1px solid #ddd;
     border-radius:10px;
     padding:10px;
-    margin-bottom:8px;
 }
 
 .command-item{
     display:flex;
     justify-content:space-between;
     margin-bottom:6px;
-    font-size:13px;
 }
 
 .command-value{
-    font-weight:bold;
     color:#d32f2f;
-}
-
-/* ================= 長官 ================= */
-
-.report-section{
-    margin-top:12px;
-    border-top:2px solid #eee;
-    padding-top:10px;
-}
-
-.report-header{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-}
-
-.report-title{
-    font-size:14px;
     font-weight:bold;
 }
 
-.btn-reset{
-    width:auto;
-    margin:0;
-    padding:3px 8px;
-    background:#f1f1f1;
-    border:1px solid #ddd;
-    color:#666;
-    font-size:11px;
-}
-
-.btn-grid{
-    display:grid;
-    grid-template-columns:repeat(2,1fr);
-    gap:8px;
-    margin-top:8px;
-}
-
-.report-item{
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-}
-
-.btn-report{
-    background:#fff;
-    border:1px solid #ddd;
-    font-size:12px;
-    width:100%;
-}
-
-.btn-arrived{
-    border-left:4px solid #4caf50;
-}
-
-.btn-left{
-    border-left:4px solid #f44336;
-}
-
-.time-label{
-    margin-top:4px;
-    font-size:16px;
-    font-weight:900;
-    color:#c62828;
-}
-
-/* ================= marker ================= */
+/* =====================================================
+   Marker
+===================================================== */
 
 .marker-icon{
     display:flex;
     justify-content:center;
     align-items:center;
+
     width:40px;
     height:40px;
+
     border-radius:50%;
+
     background:white;
+
     border:2px solid #c62828;
+
     font-size:22px;
+
     box-shadow:0 0 10px rgba(0,0,0,.3);
 }
+
+/* 神轎動畫 */
 
 .god-marker{
     animation:pulse 2s infinite;
 }
 
 .tail-marker{
-    border-color:#4caf50;
+    border-color:#43a047;
 }
+
+/* 警力 */
 
 .police-marker{
     width:18px;
     height:18px;
+
     border-radius:50%;
+
     border:2px solid white;
-    box-shadow:0 0 6px rgba(0,0,0,.4);
+
+    box-shadow:0 0 6px rgba(0,0,0,.5);
 }
 
 @keyframes pulse{
-    0%{ box-shadow:0 0 0 0 rgba(198,40,40,.7);}
-    70%{ box-shadow:0 0 0 10px rgba(198,40,40,0);}
-    100%{ box-shadow:0 0 0 0 rgba(198,40,40,0);}
+
+    0%{
+        box-shadow:0 0 0 0 rgba(198,40,40,.7);
+    }
+
+    70%{
+        box-shadow:0 0 0 10px rgba(198,40,40,0);
+    }
+
+    100%{
+        box-shadow:0 0 0 0 rgba(198,40,40,0);
+    }
 }
 
-.btn-clear-path{
-    background:#607d8b;
-    color:white;
-    margin-top:10px;
-}
 </style>
 </head>
 
 <body>
 
+<!-- =====================================================
+     主控制面板
+===================================================== -->
+
 <div id="mainPanel" class="control-panel">
 
+    <!-- 頂端 -->
+
     <div class="panel-header" onclick="togglePanel()">
-        <span><b>👮‍♂️ 2026 金門迎城隍勤務</b></span>
-        <button class="btn-toggle" id="toggleBtn">收合</button>
+
+        <span>👮‍♂️ 2026金門迎城隍勤務</span>
+
+        <button class="btn-toggle"
+        id="toggleBtn">
+        收合
+        </button>
+
     </div>
 
-    <div id="liveClock" class="live-clock">----/--/-- --:--:--</div>
+    <!-- 時鐘 -->
+
+    <div id="liveClock"
+    class="live-clock">
+    </div>
+
+    <!-- 面板內容 -->
 
     <div class="panel-content">
 
-        <!-- 原有功能 -->
-        <button id="tailBtn" class="btn-tail" onclick="toggleTailMode()">🚩 隊伍尾端回報</button>
-        <button id="adminBtn" class="btn-admin" onclick="toggleAdminMode()">📡 神轎位置回報</button>
+        <!-- 原功能 -->
 
-        <div id="statusText" class="status-info">等待數據中...</div>
-        <div id="distanceText" class="dist-info">隊伍長度：-- 公尺</div>
+        <button id="tailBtn"
+        class="btn-tail">
+        🚩 隊伍尾端回報
+        </button>
 
-        <!-- 新增警力跳崗 -->
+        <button id="adminBtn"
+        class="btn-admin">
+        📡 神轎位置回報
+        </button>
+
+        <div id="statusText"
+        class="status-info">
+        等待數據中...
+        </div>
+
+        <div id="distanceText"
+        class="dist-info">
+        隊伍長度：-- 公尺
+        </div>
+
+        <!-- 跳崗部署 -->
+
         <div class="jump-section">
-            <div class="section-title">🚓 警力跳崗部署系統</div>
 
-            <div class="stage-grid">
-                <button class="stage-btn stage1" onclick="runStage(1)">執行第1階段</button>
-                <button class="stage-btn stage2" onclick="runStage(2)">執行第2階段</button>
-                <button class="stage-btn stage3" onclick="runStage(3)">執行第3階段</button>
-                <button class="stage-btn stage4" onclick="runStage(4)">執行第4階段</button>
+            <div class="section-title">
+            🚓 警力跳崗部署
             </div>
 
-            <button class="reset-force" onclick="resetPolice()">↩ 重置警力位置</button>
+            <div class="stage-grid">
+
+                <button class="stage-btn stage1"
+                onclick="runStage(1)">
+                第1階段
+                </button>
+
+                <button class="stage-btn stage2"
+                onclick="runStage(2)">
+                第2階段
+                </button>
+
+                <button class="stage-btn stage3"
+                onclick="runStage(3)">
+                第3階段
+                </button>
+
+                <button class="stage-btn stage4"
+                onclick="runStage(4)">
+                第4階段
+                </button>
+
+            </div>
+
+            <button class="reset-force"
+            onclick="resetPolice()">
+            ↩ 重置警力
+            </button>
+
         </div>
 
         <!-- 指揮統計 -->
+
         <div class="command-panel">
-            <div class="section-title">📊 指揮統計面板</div>
+
+            <div class="section-title">
+            📊 指揮統計
+            </div>
 
             <div class="command-box">
+
                 <div class="command-item">
                     <span>總警力</span>
-                    <span class="command-value">100 人</span>
+                    <span class="command-value">
+                    100 人
+                    </span>
                 </div>
 
                 <div class="command-item">
                     <span>目前階段</span>
-                    <span id="stageLabel" class="command-value">第1階段</span>
+                    <span id="stageLabel"
+                    class="command-value">
+                    第1階段
+                    </span>
                 </div>
 
                 <div class="command-item">
                     <span>移動中警力</span>
-                    <span id="movingCount" class="command-value">0 人</span>
+                    <span id="movingCount"
+                    class="command-value">
+                    0 人
+                    </span>
                 </div>
 
                 <div class="command-item">
                     <span>完成部署</span>
-                    <span id="arrivedCount" class="command-value">100 人</span>
+                    <span id="arrivedCount"
+                    class="command-value">
+                    100 人
+                    </span>
                 </div>
-            </div>
-        </div>
 
-        <!-- 長官 -->
-        <div class="report-section">
-            <div class="report-header">
-                <span class="report-title">📌 長官蒞臨時間</span>
-                <button class="btn-reset" onclick="resetSection('蒞')">清空</button>
             </div>
-            <div class="btn-grid" id="arrivalGrid"></div>
-        </div>
 
-        <div class="report-section">
-            <div class="report-header">
-                <span class="report-title">🚶 長官離轄時間</span>
-                <button class="btn-reset" onclick="resetSection('離')">清空</button>
-            </div>
-            <div class="btn-grid" id="departureGrid"></div>
         </div>
-
-        <button class="btn-clear-path" onclick="clearRoutePath()">🧹 清除今日行走軌跡</button>
 
     </div>
+
 </div>
+
+<!-- 地圖 -->
 
 <div id="map"></div>
 
 <script>
 
-/* =========================================================
-   1. 原始路線
-========================================================= */
+/* =====================================================
+   1. 繞境路線
+===================================================== */
 
 const rawCoords = [
+
 [118.31598185256757,24.432490591580518],
 [118.31588557768761,24.432564156830114],
 [118.31578930280764,24.43263772207971],
@@ -398,16 +468,33 @@ const rawCoords = [
 [118.3151431822742,24.432633750441752],
 [118.31500769258054,24.432759653379634],
 [118.31466096651604,24.43263660189679],
-[118.31443911614434,24.433037403086345]
+[118.31443911614434,24.433037403086345],
+[118.3147095189529,24.433315152180626],
+[118.31482230303706,24.4331652943072],
+[118.31496966114895,24.433065800804854],
+[118.31512375737375,24.433054902114108],
+[118.31520179073232,24.433151027789364],
+[118.3154965906545,24.43352347996357],
+[118.31594351631071,24.433958887263998],
+[118.31626267614791,24.43352987765745],
+[118.31655393496982,24.433097557369628]
+
 ];
 
-const routePoints = rawCoords.map(p=>[p[1],p[0]]);
+/* Leaflet格式 */
 
-/* =========================================================
+const routePoints =
+rawCoords.map(p=>[p[1],p[0]]);
+
+/* =====================================================
    2. 地圖初始化
-========================================================= */
+===================================================== */
 
-const map = L.map('map',{ zoomControl:false }).setView([24.4335,118.3165],16);
+const map = L.map('map',{
+    zoomControl:false
+}).setView([24.4335,118.3165],16);
+
+/* 地圖底圖 */
 
 L.tileLayer(
 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
@@ -416,423 +503,77 @@ L.tileLayer(
 }
 ).addTo(map);
 
-L.polyline(routePoints,{
-    color:"#d32f2f",
-    weight:6,
-    opacity:.35
-}).addTo(map);
+/* =====================================================
+   3. 淡紅色繞境路線
+===================================================== */
 
-const passedPath = L.polyline([],{
-    color:"#555",
-    weight:4,
-    dashArray:"5,8",
-    opacity:.85
-}).addTo(map);
+const paradeRoute = L.polyline(
+    routePoints,
+    {
+        color:'#ef9a9a',
+        weight:7,
+        opacity:0.9,
+        lineJoin:'round'
+    }
+).addTo(map);
 
-/* =========================================================
-   3. 神轎 marker
-========================================================= */
+/* 已行經灰色路線 */
+
+const passedPath = L.polyline(
+    [],
+    {
+        color:'#616161',
+        weight:4,
+        dashArray:'5,8',
+        opacity:0.8
+    }
+).addTo(map);
+
+/* =====================================================
+   4. 神轎與隊尾 marker
+===================================================== */
 
 const godIcon = L.divIcon({
-    html:'<div class="marker-icon god-marker">👨‍⚖️</div>',
+    html:`
+    <div class="marker-icon god-marker">
+    👨‍⚖️
+    </div>
+    `,
     className:'',
     iconSize:[40,40],
     iconAnchor:[20,20]
 });
 
 const tailIcon = L.divIcon({
-    html:'<div class="marker-icon tail-marker">🚩</div>',
+    html:`
+    <div class="marker-icon tail-marker">
+    🚩
+    </div>
+    `,
     className:'',
     iconSize:[36,36],
     iconAnchor:[18,18]
 });
 
-const palanquinMarker = L.marker(routePoints[0],{
+/* 神轎 */
+
+const palanquinMarker =
+L.marker(routePoints[0],{
     icon:godIcon
 }).addTo(map);
 
-const tailMarker = L.marker([0,0],{
-    icon:tailIcon,
-    opacity:0
+/* 隊尾 */
+
+const tailMarker =
+L.marker(routePoints[0],{
+    icon:tailIcon
 }).addTo(map);
 
-/* =========================================================
-   4. 面板
-========================================================= */
-
-function togglePanel(){
-    const panel=document.getElementById('mainPanel');
-    const btn=document.getElementById('toggleBtn');
-
-    panel.classList.toggle('minimized');
-
-    btn.innerText=
-        panel.classList.contains('minimized')
-        ? '展開'
-        : '收合';
-}
-
-/* =========================================================
-   5. Firebase
-========================================================= */
-
-const firebaseConfig = {
-    apiKey: "AIzaSyAWtgeRkdjtaHdtnoKdgOMQ_PTBMpwmsLI",
-    databaseURL: "https://kinmen-location-default-rtdb.firebaseio.com",
-    projectId: "kinmen-location"
-};
-
-firebase.initializeApp(firebaseConfig);
-
-const db = firebase.database();
-
-/* =========================================================
-   6. 神轎定位
-========================================================= */
-
-let godPos=null;
-let tailPos=null;
-
-function calculateDistance(){
-
-    if(godPos && tailPos){
-
-        const d =
-        L.latLng(godPos)
-        .distanceTo(L.latLng(tailPos));
-
-        document.getElementById('distanceText')
-        .innerText=`隊伍長度：${Math.round(d)} 公尺`;
-    }
-}
-
-function syncPalanquin(lat,lng){
-
-    godPos=[lat,lng];
-
-    const currentPos=L.latLng(lat,lng);
-
-    let minDist=Infinity;
-    let closestIdx=0;
-
-    routePoints.forEach((p,i)=>{
-
-        const d =
-        L.latLng(p).distanceTo(currentPos);
-
-        if(d<minDist){
-            minDist=d;
-            closestIdx=i;
-        }
-    });
-
-    passedPath.setLatLngs(
-        routePoints.slice(0,closestIdx+1)
-    );
-
-    palanquinMarker.setLatLng(
-        routePoints[closestIdx]
-    );
-
-    calculateDistance();
-}
-
-db.ref('palanquin/location')
-.on('value',(s)=>{
-
-    const d=s.val();
-
-    if(d){
-
-        syncPalanquin(d.lat,d.lng);
-
-        document.getElementById('statusText')
-        .innerText=
-        "最後更新：" +
-        new Date(d.timestamp)
-        .toLocaleTimeString([],{
-            hour:'2-digit',
-            minute:'2-digit'
-        });
-    }
-});
-
-db.ref('palanquin/tail')
-.on('value',(s)=>{
-
-    const d=s.val();
-
-    if(d){
-
-        tailPos=[d.lat,d.lng];
-
-        tailMarker
-        .setLatLng(tailPos)
-        .setOpacity(1);
-
-        calculateDistance();
-    }
-});
-
-/* =========================================================
-   7. 清除路徑
-========================================================= */
-
-db.ref('system/pathReset')
-.on('value',()=>{
-
-    passedPath.setLatLngs([]);
-});
-
-function clearRoutePath(){
-
-    if(confirm("確定清除灰色行走軌跡？")){
-
-        db.ref('system/pathReset')
-        .set(Date.now());
-    }
-}
-
-/* =========================================================
-   8. 時鐘
-========================================================= */
-
-function updateClock(){
-
-    const now = new Date();
-
-    const y = now.getFullYear();
-    const m = String(now.getMonth()+1).padStart(2,'0');
-    const d = String(now.getDate()).padStart(2,'0');
-
-    const hh = String(now.getHours()).padStart(2,'0');
-    const mm = String(now.getMinutes()).padStart(2,'0');
-    const ss = String(now.getSeconds()).padStart(2,'0');
-
-    document.getElementById('liveClock')
-    .innerText=
-    `${y}/${m}/${d} ${hh}:${mm}:${ss}`;
-}
-
-setInterval(updateClock,1000);
-updateClock();
-
-/* =========================================================
-   9. 神轎頭定位
-========================================================= */
-
-let isAdmin=false;
-let watchId=null;
-
-function toggleAdminMode(){
-
-    if(!isAdmin){
-
-        if(confirm("啟動神轎頭定位？")){
-
-            isAdmin=true;
-
-            document.getElementById('adminBtn')
-            .innerText="🛑 停止發送(頭)";
-
-            document.getElementById('adminBtn')
-            .style.background="#f44336";
-
-            watchId =
-            navigator.geolocation.watchPosition((p)=>{
-
-                db.ref('palanquin/location')
-                .set({
-                    lat:p.coords.latitude,
-                    lng:p.coords.longitude,
-                    timestamp:Date.now()
-                });
-
-            },null,{
-                enableHighAccuracy:true
-            });
-        }
-
-    }else{
-
-        isAdmin=false;
-
-        document.getElementById('adminBtn')
-        .innerText="📡 神轎位置回報";
-
-        document.getElementById('adminBtn')
-        .style.background="#ff9800";
-
-        navigator.geolocation.clearWatch(watchId);
-    }
-}
-
-/* =========================================================
-   10. 隊尾定位
-========================================================= */
-
-let isTail=false;
-let tailWatchId=null;
-
-function toggleTailMode(){
-
-    if(!isTail){
-
-        if(confirm("啟動隊尾定位？")){
-
-            isTail=true;
-
-            document.getElementById('tailBtn')
-            .innerText="🛑 停止回報(尾)";
-
-            document.getElementById('tailBtn')
-            .style.background="#f44336";
-
-            tailWatchId=
-            navigator.geolocation.watchPosition((p)=>{
-
-                db.ref('palanquin/tail')
-                .set({
-                    lat:p.coords.latitude,
-                    lng:p.coords.longitude,
-                    timestamp:Date.now()
-                });
-
-            },null,{
-                enableHighAccuracy:true
-            });
-        }
-
-    }else{
-
-        isTail=false;
-
-        document.getElementById('tailBtn')
-        .innerText="🚩 隊伍尾端回報";
-
-        document.getElementById('tailBtn')
-        .style.background="#43a047";
-
-        navigator.geolocation.clearWatch(tailWatchId);
-    }
-}
-
-/* =========================================================
-   11. 長官系統
-========================================================= */
-
-const officials = [
-'縣長',
-'李副縣長',
-'陳副縣長',
-'議長',
-'副議長'
-];
-
-function initGrids(){
-
-    const arrivalGrid =
-    document.getElementById('arrivalGrid');
-
-    const departureGrid =
-    document.getElementById('departureGrid');
-
-    officials.forEach(p=>{
-
-        arrivalGrid.innerHTML += `
-        <div class="report-item">
-            <button class="btn-report btn-arrived"
-            onclick="reportStatus('${p}','蒞轄')">
-            ${p.replace('副縣長','副縣')}
-            </button>
-
-            <span id="time-${p}-蒞"
-            class="time-label">--:--</span>
-        </div>`;
-
-        departureGrid.innerHTML += `
-        <div class="report-item">
-            <button class="btn-report btn-left"
-            onclick="reportStatus('${p}','離轄')">
-            ${p.replace('副縣長','副縣')}
-            </button>
-
-            <span id="time-${p}-離"
-            class="time-label">--:--</span>
-        </div>`;
-    });
-}
-
-initGrids();
-
-function reportStatus(person,action){
-
-    if(!confirm(`確認更新 ${person} ${action}時間？`))
-        return;
-
-    const key =
-    action==='蒞轄' ? '蒞' : '離';
-
-    db.ref(`officials/${person}/${key}`)
-    .set({
-        timestamp:Date.now()
-    });
-}
-
-function resetSection(key){
-
-    if(!confirm('確定清空時間？'))
-        return;
-
-    db.ref('officials')
-    .once('value',(s)=>{
-
-        const data=s.val();
-
-        if(!data) return;
-
-        Object.keys(data).forEach(person=>{
-
-            db.ref(`officials/${person}/${key}`)
-            .remove();
-        });
-    });
-}
-
-db.ref('officials')
-.on('value',(s)=>{
-
-    const d=s.val() || {};
-
-    officials.forEach(p=>{
-
-        ['蒞','離'].forEach(k=>{
-
-            const el =
-            document.getElementById(`time-${p}-${k}`);
-
-            if(d[p] && d[p][k]){
-
-                const t =
-                new Date(d[p][k].timestamp);
-
-                el.innerText=
-                `${String(t.getHours()).padStart(2,'0')}:${String(t.getMinutes()).padStart(2,'0')}`;
-
-            }else{
-
-                el.innerText='--:--';
-            }
-        });
-    });
-});
-
-/* =========================================================
-   12. 新增：100警力跳崗系統
-========================================================= */
+/* =====================================================
+   5. 建立100警力
+===================================================== */
 
 const policeMarkers = [];
-const policeData = [];
 
 const stageColors = {
     1:'#1565c0',
@@ -842,64 +583,64 @@ const stageColors = {
 };
 
 function randomOffset(){
-    return (Math.random()-0.5) * 0.002;
+    return (Math.random()-0.5)*0.002;
 }
 
-/* 建立100警力 */
 for(let i=0;i<100;i++){
 
-    const baseLat = 24.4335 + randomOffset();
-    const baseLng = 118.3165 + randomOffset();
+    const lat = 24.4335 + randomOffset();
+    const lng = 118.3165 + randomOffset();
 
     const icon = L.divIcon({
         className:'',
         html:`
         <div class="police-marker"
-        style="background:${stageColors[1]}"></div>
+        style="background:${stageColors[1]}">
+        </div>
         `,
         iconSize:[18,18],
         iconAnchor:[9,9]
     });
 
-    const marker = L.marker(
-        [baseLat,baseLng],
-        { icon }
-    ).addTo(map);
+    const marker =
+    L.marker([lat,lng],{
+        icon
+    }).addTo(map);
 
-    marker.bindTooltip(
-        `警力 ${i+1}`,
-        {
-            permanent:false
-        }
-    );
+    marker.bindTooltip(`警力 ${i+1}`);
 
     policeMarkers.push(marker);
-
-    policeData.push({
-        id:i+1,
-        lat:baseLat,
-        lng:baseLng
-    });
 }
 
-/* =========================================================
-   平滑動畫
-========================================================= */
+/* =====================================================
+   6. 平滑動畫
+===================================================== */
 
-function smoothMove(marker,start,end,duration,color){
+function smoothMove(
+    marker,
+    start,
+    end,
+    duration,
+    color
+){
 
     const startTime = performance.now();
 
     function animate(now){
 
         const progress =
-        Math.min((now-startTime)/duration,1);
+        Math.min(
+            (now-startTime)/duration,
+            1
+        );
 
         const lat =
-        start[0] + (end[0]-start[0])*progress;
+        start[0] +
+        (end[0]-start[0])*progress;
 
         const lng =
-        start[1] + (end[1]-start[1])*progress;
+        start[1] +
+        (end[1]-start[1])*progress;
 
         marker.setLatLng([lat,lng]);
 
@@ -924,21 +665,25 @@ function smoothMove(marker,start,end,duration,color){
     requestAnimationFrame(animate);
 }
 
-/* =========================================================
-   各階段部署
-========================================================= */
+/* =====================================================
+   7. 跳崗部署
+===================================================== */
 
 function generateStageTarget(stage,index){
 
-    const base = routePoints[
-        index % routePoints.length
-    ];
+    const base =
+    routePoints[index % routePoints.length];
 
     let factor = 0.0008 * stage;
 
     return [
-        base[0] + ((Math.random()-0.5)*factor),
-        base[1] + ((Math.random()-0.5)*factor)
+
+        base[0] +
+        ((Math.random()-0.5)*factor),
+
+        base[1] +
+        ((Math.random()-0.5)*factor)
+
     ];
 }
 
@@ -954,19 +699,22 @@ function runStage(stage){
         let shouldMove = false;
 
         if(stage===1){
-            shouldMove=true;
+            shouldMove = true;
         }
 
-        if(stage===2 && index<35){
-            shouldMove=true;
+        if(stage===2 && index < 35){
+            shouldMove = true;
         }
 
-        if(stage===3 && index>=35 && index<70){
-            shouldMove=true;
+        if(stage===3 &&
+            index >=35 &&
+            index <70){
+            shouldMove = true;
         }
 
-        if(stage===4 && index>=70){
-            shouldMove=true;
+        if(stage===4 &&
+            index >=70){
+            shouldMove = true;
         }
 
         if(shouldMove){
@@ -987,6 +735,7 @@ function runStage(stage){
                 stageColors[stage]
             );
         }
+
     });
 
     document.getElementById('movingCount')
@@ -1006,16 +755,19 @@ function runStage(stage){
     },5500);
 }
 
-/* =========================================================
-   重置警力
-========================================================= */
+/* =====================================================
+   8. 重置警力
+===================================================== */
 
 function resetPolice(){
 
-    policeMarkers.forEach((marker,index)=>{
+    policeMarkers.forEach(marker=>{
 
-        const lat = 24.4335 + randomOffset();
-        const lng = 118.3165 + randomOffset();
+        const lat =
+        24.4335 + randomOffset();
+
+        const lng =
+        118.3165 + randomOffset();
 
         marker.setLatLng([lat,lng]);
 
@@ -1024,12 +776,14 @@ function resetPolice(){
                 className:'',
                 html:`
                 <div class="police-marker"
-                style="background:${stageColors[1]}"></div>
+                style="background:${stageColors[1]}">
+                </div>
                 `,
                 iconSize:[18,18],
                 iconAnchor:[9,9]
             })
         );
+
     });
 
     document.getElementById('stageLabel')
@@ -1041,6 +795,126 @@ function resetPolice(){
     document.getElementById('arrivedCount')
     .innerText='100 人';
 }
+
+/* =====================================================
+   9. 即時時鐘
+===================================================== */
+
+function updateClock(){
+
+    const now = new Date();
+
+    const y =
+    now.getFullYear();
+
+    const m =
+    String(now.getMonth()+1)
+    .padStart(2,'0');
+
+    const d =
+    String(now.getDate())
+    .padStart(2,'0');
+
+    const hh =
+    String(now.getHours())
+    .padStart(2,'0');
+
+    const mm =
+    String(now.getMinutes())
+    .padStart(2,'0');
+
+    const ss =
+    String(now.getSeconds())
+    .padStart(2,'0');
+
+    document.getElementById('liveClock')
+    .innerText=
+    `${y}/${m}/${d} ${hh}:${mm}:${ss}`;
+}
+
+setInterval(updateClock,1000);
+
+updateClock();
+
+/* =====================================================
+   10. 收合面板
+===================================================== */
+
+function togglePanel(){
+
+    const panel =
+    document.getElementById('mainPanel');
+
+    const btn =
+    document.getElementById('toggleBtn');
+
+    panel.classList.toggle('minimized');
+
+    btn.innerText =
+    panel.classList.contains('minimized')
+    ? '展開'
+    : '收合';
+}
+
+/* =====================================================
+   11. 模擬神轎移動
+===================================================== */
+
+let routeIndex = 0;
+
+setInterval(()=>{
+
+    routeIndex++;
+
+    if(routeIndex >= routePoints.length){
+        routeIndex = 0;
+    }
+
+    const point =
+    routePoints[routeIndex];
+
+    /* 神轎 */
+
+    palanquinMarker.setLatLng(point);
+
+    /* 已行經 */
+
+    passedPath.setLatLngs(
+        routePoints.slice(
+            0,
+            routeIndex+1
+        )
+    );
+
+    /* 隊尾 */
+
+    const tailIndex =
+    Math.max(0,routeIndex-2);
+
+    tailMarker.setLatLng(
+        routePoints[tailIndex]
+    );
+
+    /* 距離 */
+
+    const d =
+    L.latLng(routePoints[routeIndex])
+    .distanceTo(
+        L.latLng(routePoints[tailIndex])
+    );
+
+    document.getElementById('distanceText')
+    .innerText=
+    `隊伍長度：${Math.round(d)} 公尺`;
+
+    /* 狀態 */
+
+    document.getElementById('statusText')
+    .innerText=
+    "最後更新：" +
+    new Date().toLocaleTimeString();
+
+},3000);
 
 </script>
 
